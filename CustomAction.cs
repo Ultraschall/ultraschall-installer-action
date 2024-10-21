@@ -52,7 +52,10 @@ namespace custom_action
           session.Log("ULTRASCHALL: " + directory + " found");
           MoveDirectoryPreserveLicense(session, Path.Combine(source, Path.GetFileName(directory)), Path.Combine(target, Path.GetFileName(directory)));
           session.Log("ULTRASCHALL: " + directory + " copied");
-          Directory.Delete(directory);
+          if (PreserveDirectory(directory) == false) 
+          {
+            Directory.Delete(directory);
+          }
           session.Log("ULTRASCHALL: " + directory + " deleted");
         }
 
@@ -61,7 +64,10 @@ namespace custom_action
           File.Copy(file, Path.Combine(target, Path.GetFileName(file)));
           session.Log("ULTRASCHALL: " + file + " copied");
           if (String.Equals(Path.GetFileName(file), "reaper-license.rk", StringComparison.OrdinalIgnoreCase) == false) {
-            File.Delete(file);
+            if(PreserveFile(file) == false)
+            {
+              File.Delete(file);
+            }
             session.Log("ULTRASCHALL: " + file + " deleted");
           }
           else {
@@ -74,6 +80,37 @@ namespace custom_action
         session.Log(e.Message);
         session.Log(e.StackTrace);
       }
+    }
+
+    private static bool PreserveDirectory(string directory) 
+    {
+      if(directory.ToLower().Contains("projecttemplates")) 
+      {
+        return true;
+      }
+      return false;
+    }
+
+    private static bool PreserveFile(string file)
+    {
+      if (file.ToLower().Contains("projecttemplates")) 
+      {
+        if (file.ToLower().Contains("studiolink and soundboard.rpp")) {
+          return false;
+        }
+        else if (file.ToLower().Contains("studiolink.rpp")) {
+          return false;
+        }
+        else if (file.ToLower().Contains("ultraschall soundboard.rpp")) {
+          return false;
+        }
+        else 
+        {
+          // Preserve custom templates
+          return true;
+        }
+      }
+      return false;
     }
 
     private static string CreateTimestampString()
